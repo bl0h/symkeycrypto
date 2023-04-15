@@ -1,0 +1,4 @@
+hello this is a sample file that is supposed to get encrypted by
+our program.
+
+hopefully it works
