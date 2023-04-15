@@ -9,33 +9,37 @@
 from Crypto.Cipher import AES
 import secrets
 import base64
+import sys
+
 
 def main():
     key = secrets.token_bytes(16)  # Generate 16 random bytes (i.e., 128 bits)
-    print(key.hex())  # Convert the bytes to a hex string for display purposes
+    print('Random generated key: ' + key.hex())  # Convert the bytes to a hex string for display purposes
 
-    f = open('sample.txt', 'r')
-    outF = open('output.txt', 'w')
-    plaintext = f.read()
+    with open(sys.argv[1], 'rb') as f:
+        header = f.read(54)  # BMP header is 54 bytes long
+        plaintext = f.read()
+
     chunks = split_text(plaintext)
-    print(plaintext)
+    
     cipher = AES.new(key, AES.MODE_ECB) 
+    ciphertext_chunks = []
     for chunk in chunks:
-        chunk_bytes = chunk.encode('utf-8')
-        ciphertext = cipher.encrypt(chunk_bytes)
-        print(ciphertext)
-        outF.write(base64.b64encode(ciphertext).decode('utf-8'));
+        ciphertext_chunk = cipher.encrypt(chunk)
+        ciphertext_chunks.append(ciphertext_chunk)
 
-    f.close()
+    with open(sys.argv[2], 'wb') as outF:
+        outF.write(header);
+        outF.write(b''.join(ciphertext_chunks))
 
 
+#splits this into 128 bit chunks and then pads 0's if isn't 128 bits (16 bytes) long
 def split_text(text):
     chunks = []
     for i in range(0, len(text), 16):
         chunk = text[i:i+16]
-        # If the last chunk is less than 16 bytes, pad it with spaces
         if len(chunk) < 16:
-            chunk += '\x00' * (16 - len(chunk))
+            chunk += b'\x00' * (16 - len(chunk))
         chunks.append(chunk)
     return chunks
 
