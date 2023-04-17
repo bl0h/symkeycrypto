@@ -1,4 +1,5 @@
 from operator import truediv
+from pydoc import plain
 from Crypto.Cipher import AES
 import secrets
 import base64
@@ -26,7 +27,7 @@ def submit(s):
 def verify(s):
     cipher = AES.new(key, AES.MODE_CBC, iv=iv)
     plaintext = str(cipher.decrypt(s))
-    print(plaintext)
+    print("verify plaintext: ", plaintext)
     if (plaintext.find(";admin=true;") > -1):
         return True
     return False
@@ -41,13 +42,20 @@ def pad(s):
 def main():
     cipher = submit("You're the man now, dog")
     print(len(cipher))
-    print(cipher)
-    print(verify(cipher))
+    print("cipher: ", cipher)
+    print("verify: ", verify(cipher))
+    aes = AES.new(key, AES.MODE_CBC, iv=iv)
+    plaintext = str(aes.decrypt(cipher))
+    print("plaintext: ", plaintext)
     attack_str = ";admin=true;"
     # byte flipping
     for i in range(len(attack_str)):
-        cipher[i+16] = ord(attack_str[i]) ^ cipher[i+16]
-        cipher[i] = cipher[i+16] ^ ord(attack_str[i])
+        print("cipher val: ", cipher[i], " plain value: ",
+              plaintext[i+16], " attack: ", attack_str[i])
+        cipher[i] = (cipher[i] ^ ord(attack_str[i]) ^ ord(plaintext[i+18]))
+        # this is normally 16 since that is our block size.
+        # python puts an extra b" characters at the front of our string
+        # in this concatenation, so we use 18 instead of 16 for the offsetting here
     print(verify(cipher))
 
 
