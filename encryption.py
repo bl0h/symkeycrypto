@@ -12,25 +12,25 @@ import base64
 import sys
 
 
-# def main():
-#     key = secrets.token_bytes(16)  # Generate 16 random bytes (i.e., 128 bits)
-#     # Convert the bytes to a hex string for display purposes
-#     print('Random generated key: ' + key.hex())
+def main():
+    key = secrets.token_bytes(16)  # Generate 16 random bytes (i.e., 128 bits)
+    # Convert the bytes to a hex string for display purposes
+    print('Random generated key: ' + key.hex())
 
-#     with open(sys.argv[2], 'rb') as f:
-#         header = f.read(54)  # BMP header is 54 bytes long
-#         plaintext = f.read()
+    with open(sys.argv[2], 'rb') as f:
+        header = f.read(54)  # BMP header is 54 bytes long
+        plaintext = f.read()
 
-#     chunks = split_text(plaintext)
+    chunks = split_text(plaintext)
 
-#     if (sys.argv[1] == 'ecb'):
-#         ciphertext_chunks = ecb(chunks, key)
-#     elif (sys.argv[1] == 'cbc'):
-#         ciphertext_chunks = cbc(chunks, key)
+    if (sys.argv[1] == 'ecb'):
+        ciphertext_chunks = ecb(chunks, key)
+    elif (sys.argv[1] == 'cbc'):
+        ciphertext_chunks = cbc(chunks, key)
 
-#     with open(sys.argv[3], 'wb') as outF:
-#         outF.write(header)
-#         outF.write(ciphertext_chunks)
+    with open(sys.argv[3], 'wb') as outF:
+        outF.write(header)
+        outF.write(ciphertext_chunks)
 
 
 # splits this into 128 bit chunks and then pads 0's if isn't 128 bits (16 bytes) long
@@ -39,7 +39,7 @@ def split_text(text):
     for i in range(0, len(text), 16):
         chunk = text[i:i+16]
         if len(chunk) < 16:
-            chunk += hex(16-len(chunk))[2:4] * (16 - len(chunk))
+            chunk += (hex(16-len(chunk))[2:4] * (16 - len(chunk))).encode()
         chunks.append(chunk)
     return chunks
 
@@ -85,4 +85,4 @@ def cbc(chunks, key, iv=None):
     return ciphertext_chunks
 
 
-# main()
+main()
